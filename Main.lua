@@ -1948,7 +1948,7 @@ end
         })
     end)
     runFunction(function()
-        local reachval = {Value = 21}
+        local reachval = {Value = 30}
         local Reach = {Enabled = false}
         Reach = GuiLibrary.CreateOptionsButton({
             Name = "Reach",
@@ -1958,7 +1958,7 @@ end
             if callback then
                 bedwars["CombatConstant"].RAYCAST_SWORD_CHARACTER_DISTANCE = reachval["Value"]
             else
-                bedwars["CombatConstant"].RAYCAST_SWORD_CHARACTER_DISTANCE = 15.4
+                bedwars["CombatConstant"].RAYCAST_SWORD_CHARACTER_DISTANCE = 14.4
                 end
             end,
         })
