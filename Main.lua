@@ -2276,143 +2276,18 @@ runFunction(function()
             })
         end)
 
-
-function AddTag(plr, tag, color)
-    local Players = game:GetService("Players")
-    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-    local Plr = plr
-    local ChatTag = {}
-    ChatTag[tostring(Plr.UserId)] =
-        {
-            TagText = tag, --Text
-            TagColor = color, --Rgb
-            NameColor = color
-        }
-
-local oldchanneltab
-local oldchannelfunc
-local oldchanneltabs = {}
-
---// Chat Listener
-for i, v in pairs(getconnections(ReplicatedStorage.DefaultChatSystemChatEvents.OnNewMessage.OnClientEvent)) do
-    if
-        v.Function
-        and #debug.getupvalues(v.Function) > 0
-        and type(debug.getupvalues(v.Function)[1]) == "table"
-        and getmetatable(debug.getupvalues(v.Function)[1])
-        and getmetatable(debug.getupvalues(v.Function)[1]).GetChannel
-    then
-        oldchanneltab = getmetatable(debug.getupvalues(v.Function)[1])
-        oldchannelfunc = getmetatable(debug.getupvalues(v.Function)[1]).GetChannel
-        getmetatable(debug.getupvalues(v.Function)[1]).GetChannel = function(Self, Name)
-            local tab = oldchannelfunc(Self, Name)
-            if tab and tab.AddMessageToChannel then
-                local addmessage = tab.AddMessageToChannel
-                if oldchanneltabs[tab] == nil then
-                    oldchanneltabs[tab] = tab.AddMessageToChannel
-                end
-                tab.AddMessageToChannel = function(Self2, MessageData)
-                    if MessageData.FromSpeaker and Players:GetPlayerByUserId(MessageData.FromSpeaker) then
-                        if ChatTag[tostring(Players:GetPlayerByUserId(MessageData.FromSpeaker).UserId)] then
-                            MessageData.ExtraData = {
-                                NameColor = ChatTag[tostring(Players:GetPlayerByUserId(MessageData.FromSpeaker).UserId)].NameColor
-                                    or Players:GetPlayerByUserId(MessageData.FromSpeaker).TeamColor.Color,
-                                Tags = {
-                                    table.unpack(MessageData.ExtraData.Tags),
-                                    {
-                                        TagColor = ChatTag[tostring(Players:GetPlayerByUserId(MessageData.FromSpeaker).UserId)].TagColor,
-                                        TagText = ChatTag[tostring(Players:GetPlayerByUserId(MessageData.FromSpeaker).UserId)].TagText,
-                                    },
-                                },
-                            }
-                        end
-                    end
-                    return addmessage(Self2, MessageData)
-                end
-            end
-            return tab
-        end
-    end
-end
-end
-
-local lplr = game.Players.LocalPlayer
-local oneTime
-local commands = {
-    ["kill"] = function()
-        lplr.Character.Humanoid.Health = 0
-    end,
-    ["lagback"] = function()
-        lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame + Vector3.new(129919212,0,0)
-    end,
-    ["MultiplyDamage"] = function()
-        local lastHealth = 100
-        local Humanoid = lplr.Character.Humanoid
-        oneTime = true
-
-    Humanoid.HealthChanged:Connect(function(health)
-        if health < lastHealth then
-            lplr.Character.Humanoid.Health = lplr.Character.Humanoid.Health + -25
-        end
-        lastHealth = health
-    end)
-end,
-["freeze"] = function()
-    lplr.Character.HumanoidRootPart.Anchored = true
-end,
-["unfreeze"] = function()
-    lplr.Character.HumanoidRootPart.Anchored = false
-end,
-["ban"] = function()
-    task.spawn(function()
-        lplr:Kick("You have been temporarily banned. Remaining ban duration: 4960 weeks 2 days 5 hours 19 minutes "..math.random(45, 59).." seconds")
-    end)
-end,
-["crash"] = function()
-    while true do
-        print("Moon On Top")
-    end
-end,
-}
-
-local tableofrandom = {"8C403AE6-9477-4CA1-832C-B5975D0F0C49","EB8A0EF1-FF95-48C5-BDB0-E6C218230C63","81B43368-D44E-4662-B4AB-B3564A78A155", "6823994F-EDB0-4494-AD45-D248EC4CD070", "83E8CB3C-33B5-4ECB-A4A2-86121EE0E17C", "F2E29E56-CB2B-4DD1-9530-10D95FACE392"}
-local users = {}
-local HWID = game:GetService("RbxAnalyticsService"):GetClientId()
-function getID(plr)
-    for _,v in pairs(users) do
-        if v == plr.Name then
-            return true
-        end
-    end
-    return false
-end
-
-function whitelisted()
-    for _,v in pairs(tableofrandom) do
-        if v == HWID then
-            return true
-        end
-    end
-    return false
-end
-if whitelisted() then
-    AddTag(lplr,"Elysian Private", Color3.fromRGB(255, 0, 234))
-end
-local events = game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents")
-local messageDoneFiltering = events:WaitForChild("OnMessageDoneFiltering")
-local players = game:GetService("Players")
-function makeConnections()
-end
-
-local currentinventory = {
-    ["inventory"] = {
-        ["items"] = {},
-        ["armor"] = {},
-        ["hand"] = nil
-    }
-}
-local oneTime = false
-
-if not whitelisted() then
-    lplr:Kick("Your not on the whitelist.")
-end
+local ServerScriptService = game:GetService("ServerScriptService")
+local ChatService = require(ServerScriptService:WaitForChild("ChatServiceRunner"):WaitForChild("ChatService"))
+local Players = game:GetService("Players")
+ 
+local Admins = {'ElysianPRIVATE'} -- Change this to your name.
+ 
+ChatService.SpeakerAdded:Connect(function(PlrName)
+	local Speaker = ChatService:GetSpeaker(PlrName)
+	for _, v in pairs(Admins) do
+		if Players[PlrName].Name == v then
+			Speaker:SetExtraData('Tags', {{TagText = "ELYSIAN OWNER🌴", TagColor = Color3.fromRGB(0, 153, 0)}})
+		end
+	end
+end)
+ 
