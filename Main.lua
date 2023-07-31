@@ -1958,7 +1958,7 @@ end
             if callback then
                 bedwars["CombatConstant"].RAYCAST_SWORD_CHARACTER_DISTANCE = reachval["Value"]
             else
-                bedwars["CombatConstant"].RAYCAST_SWORD_CHARACTER_DISTANCE = 14.4
+                bedwars["CombatConstant"].RAYCAST_SWORD_CHARACTER_DISTANCE = 15.4
                 end
             end,
         })
@@ -2275,19 +2275,5 @@ runFunction(function()
                 end
             })
         end)
-
-local ServerScriptService = game:GetService("ServerScriptService")
-local ChatService = require(ServerScriptService:WaitForChild("ChatServiceRunner"):WaitForChild("ChatService"))
-local Players = game:GetService("Players")
- 
-local Admins = {'ElysianPRIVATE'} -- Change this to your name.
- 
-ChatService.SpeakerAdded:Connect(function(PlrName)
-	local Speaker = ChatService:GetSpeaker(PlrName)
-	for _, v in pairs(Admins) do
-		if Players[PlrName].Name == v then
-			Speaker:SetExtraData('Tags', {{TagText = "ELYSIAN OWNER🌴", TagColor = Color3.fromRGB(0, 153, 0)}})
-		end
-	end
-end)
- 
+local chatService = require (game.ServerScriptService:WaitForChild ("ChatServiceRunner"):WaitForChild ("ChatService")) 
+local tags = { = {TagText = "TEST", TagColor = Color3.fromRGB (255, 0, 0)}, -- The 0 must be changed to the the id of the user you want the tag to have } chatService.SpeakerAdded:Connect (function (playerName) local speaker = chatService:GetSpeaker (playerName) local player = game.Players [playerName] if tags then speaker:SetExtraData ("Tags", {tags [player.UserId]}) end end)
