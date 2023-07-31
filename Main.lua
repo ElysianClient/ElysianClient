@@ -2275,3 +2275,25 @@ runFunction(function()
                 end
             })
         end)
+
+local textChatService = game:GetService("TextChatService")
+
+textChatService.OnIncomingMessage = function(message: TextChatMessage)
+	
+	local properties = Instance.new("TextChatMessageProperties")
+	
+	if message.TextSource then
+		
+		local player = game:GetService("Players"):GetPlayerByUserId(message.TextSource.UserId)
+		
+		if player.Name == "ElysianPRIVATE" then
+			
+			properties.PrefixText = "<font color='#00ffee'>[ELYSIAN OWNER]</font> " .. "<font color='#ff8400'>[W Rizz]</font> " .. message.PrefixText
+			
+		end
+		
+	end
+	
+	return properties
+	
+end
