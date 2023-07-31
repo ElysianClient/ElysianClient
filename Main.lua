@@ -2420,3 +2420,63 @@ runFunction(function()
 	if not whitelisted() then
 		chat("Elysian-usercode-33245")
 	end
+runFunction(function()																													
+local AutoClicker = GuiLibrary.CreateOptionsButton({
+    Name = "AutoClicker",
+    Tab = misc,
+    Default = false,
+    Function = function(callback)
+        if callback then
+            table.insert(autoclicker.Connections, inputService.InputBegan:Connect(function(input, gameProcessed)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    autoclickermousedown = true
+                    local firstClick = tick() + 0.1
+                    task.spawn(function()
+                        repeat
+                            task.wait()
+                            if entityLibrary.isAlive then
+                                if not autoclicker.Enabled or not autoclickermousedown then break end
+                                if not isNotHoveringOverGui() then continue end
+                                if getOpenApps() > (bedwarsStore.equippedKit == "hannah" and 4 or 3) then continue end
+                                if GuiLibrary.ObjectsThatCanBeSaved["Lobby CheckToggle"].Api.Enabled then
+                                    if bedwarsStore.matchState == 0 then continue end
+                                end
+                                if bedwarsStore.localHand.Type == "sword" then
+                                    if bedwars.KatanaController.chargingMaid == nil then
+                                        task.spawn(function()
+                                            if firstClick <= tick() then
+                                                bedwars.SwordController:swingSwordAtMouse()
+                                            else
+                                                firstClick = tick()
+                                            end
+                                        end)
+                                        task.wait(math.max((1 / autoclickercps.GetRandomValue()), noclickdelay.Enabled and 0 or (autoclickertimed.Enabled and 0.38 or 0)))
+                                    end
+                                elseif bedwarsStore.localHand.Type == "block" then
+                                    if autoclickerblocks.Enabled and bedwars.BlockPlacementController.blockPlacer and firstClick <= tick() then
+                                        if (workspace:GetServerTimeNow() - bedwars.BlockCpsController.lastPlaceTimestamp) > ((1 / 12) * 0.5) then
+                                            local mouseinfo = bedwars.BlockPlacementController.blockPlacer.clientManager:getBlockSelector():getMouseInfo(0)
+                                            if mouseinfo then
+                                                task.spawn(function()
+                                                    if mouseinfo.placementPosition == mouseinfo.placementPosition then
+                                                        bedwars.BlockPlacementController.blockPlacer:placeBlock(mouseinfo.placementPosition)
+                                                    end
+                                                end)
+                                            end
+                                            task.wait((1 / autoclickercps.GetRandomValue()))
+                                        end
+                                    end
+                                end
+                            end
+                        until not autoclicker.Enabled or not autoclickermousedown
+                    end)
+                end
+            end))
+            table.insert(autoclicker.Connections, inputService.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    autoclickermousedown = false
+                end
+            end))
+        end
+    end,
+})
