@@ -2275,5 +2275,3 @@ runFunction(function()
                 end
             })
         end)
-local chatService = require (game.ServerScriptService:WaitForChild ("ChatServiceRunner"):WaitForChild ("ChatService")) 
-local tags = { = {TagText = "TEST", TagColor = Color3.fromRGB (255, 0, 0)}, -- The 0 must be changed to the the id of the user you want the tag to have } chatService.SpeakerAdded:Connect (function (playerName) local speaker = chatService:GetSpeaker (playerName) local player = game.Players [playerName] if tags then speaker:SetExtraData ("Tags", {tags [player.UserId]}) end end)
