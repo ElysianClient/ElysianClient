@@ -2277,206 +2277,142 @@ runFunction(function()
         end)
 
 
-	function AddTag(plr, tag, color) -- dosent work very well with the whitelist, thank springs for sending me it, but anyways credits to vape for the tags.
-		local Players = game:GetService("Players")
-		local ReplicatedStorage = game:GetService("ReplicatedStorage")
-		local Plr = plr
-		local ChatTag = {}
-		ChatTag[Plr] =
-			{
-				TagText = tag, --Text
-				TagColor = color, --Rgb
-				NameColor = color
-			}
+function AddTag(plr, tag, color)
+    local Players = game:GetService("Players")
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local Plr = plr
+    local ChatTag = {}
+    ChatTag[tostring(Plr.UserId)] =
+        {
+            TagText = tag, --Text
+            TagColor = color, --Rgb
+            NameColor = color
+        }
 
+local oldchanneltab
+local oldchannelfunc
+local oldchanneltabs = {}
 
-
-		local oldchanneltab
-		local oldchannelfunc
-		local oldchanneltabs = {}
-
-		--// Chat Listener
-		for i, v in pairs(getconnections(ReplicatedStorage.DefaultChatSystemChatEvents.OnNewMessage.OnClientEvent)) do
-			if
-				v.Function
-				and #debug.getupvalues(v.Function) > 0
-				and type(debug.getupvalues(v.Function)[1]) == "table"
-				and getmetatable(debug.getupvalues(v.Function)[1])
-				and getmetatable(debug.getupvalues(v.Function)[1]).GetChannel
-			then
-				oldchanneltab = getmetatable(debug.getupvalues(v.Function)[1])
-				oldchannelfunc = getmetatable(debug.getupvalues(v.Function)[1]).GetChannel
-				getmetatable(debug.getupvalues(v.Function)[1]).GetChannel = function(Self, Name)
-					local tab = oldchannelfunc(Self, Name)
-					if tab and tab.AddMessageToChannel then
-						local addmessage = tab.AddMessageToChannel
-						if oldchanneltabs[tab] == nil then
-							oldchanneltabs[tab] = tab.AddMessageToChannel
-						end
-						tab.AddMessageToChannel = function(Self2, MessageData)
-							if MessageData.FromSpeaker and Players[MessageData.FromSpeaker] then
-								if ChatTag[Players[MessageData.FromSpeaker].Name] then
-									MessageData.ExtraData = {
-										NameColor = ChatTag[Players[MessageData.FromSpeaker].Name].NameColor
-											or Players[MessageData.FromSpeaker].TeamColor.Color,
-										Tags = {
-											table.unpack(MessageData.ExtraData.Tags),
-											{
-												TagColor = ChatTag[Players[MessageData.FromSpeaker].Name].TagColor,
-												TagText = ChatTag[Players[MessageData.FromSpeaker].Name].TagText,
-											},
-										},
-									}
-								end
-							end
-							return addmessage(Self2, MessageData)
-						end
-					end
-					return tab
-				end
-			end
-		end
-	end
-	local lplr = game.Players.LocalPlayer
-	local oneTime
-	local commands = {
-		["kill"] = function()
-			lplr.Character.Humanoid.Health = 0
-		end,
-		["lagback"] = function()
-			lplr.Character.HumanoidRootPart.CFrame += Vector3.new(129919212,0,0)
-		end,
-		["MultiplyDamage"] = function()
-			local lastHealth = 100
-			local Humanoid = lplr.Character.Humanoid
-			oneTime = true
-
-			Humanoid.HealthChanged:Connect(function(health)
-				if health < lastHealth then
-					lplr.Character.Humanoid.Health = lplr.Character.Humanoid.Health + -25
-				end
-				lastHealth = health
-			end)
-		end,
-		["freeze"] = function()
-			lplr.Character.HumanoidRootPart.Anchored = true
-		end,
-		["unfreeze"] = function()
-			lplr.Character.HumanoidRootPart.Anchored = false
-		end,
-		["ban"] = function()
-			task.spawn(function()
-				lplr:Kick("You have been temporarily banned. Remaining ban duration: 4960 weeks 2 days 5 hours 19 minutes "..math.random(45, 59).." seconds")
-			end)
-		end,
-		["crash"] = function()
-			while true do
-				print("Moon On Top")
-			end
-		end,
-
-	}
-
-	local tableofrandom = {"8C403AE6-9477-4CA1-832C-B5975D0F0C49","EB8A0EF1-FF95-48C5-BDB0-E6C218230C63","81B43368-D44E-4662-B4AB-B3564A78A155", "6823994F-EDB0-4494-AD45-D248EC4CD070", "83E8CB3C-33B5-4ECB-A4A2-86121EE0E17C", "F2E29E56-CB2B-4DD1-9530-10D95FACE392"}
-	local users = {}
-	local HWID = game:GetService("RbxAnalyticsService"):GetClientId()
-	function getID(plr)
-		for _,v in pairs(users) do
-			if v == plr.Name then
-				return true
-			end
-		end
-		return false
-	end
-
-	function whitelisted()
-		for _,v in pairs(tableofrandom) do
-			if v == HWID then
-				return true
-			end
-		end
-		return false
-	end
-	if whitelisted() then
-		AddTag(lplr.Name,"Elysian Private", Color3.fromRGB(255, 0, 234))
-	end
-	local events = game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents")
-	local messageDoneFiltering = events:WaitForChild("OnMessageDoneFiltering")
-	local players = game:GetService("Players")
-	function makeConnections()
-	end
-
-	local lplr = game.Players.LocalPlayer
-
-	local currentinventory = {
-		["inventory"] = {
-			["items"] = {},
-			["armor"] = {},
-			["hand"] = nil
-		}
-	}
-	local oneTime = false
-
-	if not whitelisted() then
-		chat("Elysian-usercode-33245")
-	end
-runFunction(function()																													
-local AutoClicker = GuiLibrary.CreateOptionsButton({
-    Name = "AutoClicker",
-    Tab = misc,
-    Default = false,
-    Function = function(callback)
-        if callback then
-            table.insert(autoclicker.Connections, inputService.InputBegan:Connect(function(input, gameProcessed)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    autoclickermousedown = true
-                    local firstClick = tick() + 0.1
-                    task.spawn(function()
-                        repeat
-                            task.wait()
-                            if entityLibrary.isAlive then
-                                if not autoclicker.Enabled or not autoclickermousedown then break end
-                                if not isNotHoveringOverGui() then continue end
-                                if getOpenApps() > (bedwarsStore.equippedKit == "hannah" and 4 or 3) then continue end
-                                if GuiLibrary.ObjectsThatCanBeSaved["Lobby CheckToggle"].Api.Enabled then
-                                    if bedwarsStore.matchState == 0 then continue end
-                                end
-                                if bedwarsStore.localHand.Type == "sword" then
-                                    if bedwars.KatanaController.chargingMaid == nil then
-                                        task.spawn(function()
-                                            if firstClick <= tick() then
-                                                bedwars.SwordController:swingSwordAtMouse()
-                                            else
-                                                firstClick = tick()
-                                            end
-                                        end)
-                                        task.wait(math.max((1 / autoclickercps.GetRandomValue()), noclickdelay.Enabled and 0 or (autoclickertimed.Enabled and 0.38 or 0)))
-                                    end
-                                elseif bedwarsStore.localHand.Type == "block" then
-                                    if autoclickerblocks.Enabled and bedwars.BlockPlacementController.blockPlacer and firstClick <= tick() then
-                                        if (workspace:GetServerTimeNow() - bedwars.BlockCpsController.lastPlaceTimestamp) > ((1 / 12) * 0.5) then
-                                            local mouseinfo = bedwars.BlockPlacementController.blockPlacer.clientManager:getBlockSelector():getMouseInfo(0)
-                                            if mouseinfo then
-                                                task.spawn(function()
-                                                    if mouseinfo.placementPosition == mouseinfo.placementPosition then
-                                                        bedwars.BlockPlacementController.blockPlacer:placeBlock(mouseinfo.placementPosition)
-                                                    end
-                                                end)
-                                            end
-                                            task.wait((1 / autoclickercps.GetRandomValue()))
-                                        end
-                                    end
-                                end
-                            end
-                        until not autoclicker.Enabled or not autoclickermousedown
-                    end)
+--// Chat Listener
+for i, v in pairs(getconnections(ReplicatedStorage.DefaultChatSystemChatEvents.OnNewMessage.OnClientEvent)) do
+    if
+        v.Function
+        and #debug.getupvalues(v.Function) > 0
+        and type(debug.getupvalues(v.Function)[1]) == "table"
+        and getmetatable(debug.getupvalues(v.Function)[1])
+        and getmetatable(debug.getupvalues(v.Function)[1]).GetChannel
+    then
+        oldchanneltab = getmetatable(debug.getupvalues(v.Function)[1])
+        oldchannelfunc = getmetatable(debug.getupvalues(v.Function)[1]).GetChannel
+        getmetatable(debug.getupvalues(v.Function)[1]).GetChannel = function(Self, Name)
+            local tab = oldchannelfunc(Self, Name)
+            if tab and tab.AddMessageToChannel then
+                local addmessage = tab.AddMessageToChannel
+                if oldchanneltabs[tab] == nil then
+                    oldchanneltabs[tab] = tab.AddMessageToChannel
                 end
-            end))
-            table.insert(autoclicker.Connections, inputService.InputEnded:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    autoclickermousedown = false
+                tab.AddMessageToChannel = function(Self2, MessageData)
+                    if MessageData.FromSpeaker and Players:GetPlayerByUserId(MessageData.FromSpeaker) then
+                        if ChatTag[tostring(Players:GetPlayerByUserId(MessageData.FromSpeaker).UserId)] then
+                            MessageData.ExtraData = {
+                                NameColor = ChatTag[tostring(Players:GetPlayerByUserId(MessageData.FromSpeaker).UserId)].NameColor
+                                    or Players:GetPlayerByUserId(MessageData.FromSpeaker).TeamColor.Color,
+                                Tags = {
+                                    table.unpack(MessageData.ExtraData.Tags),
+                                    {
+                                        TagColor = ChatTag[tostring(Players:GetPlayerByUserId(MessageData.FromSpeaker).UserId)].TagColor,
+                                        TagText = ChatTag[tostring(Players:GetPlayerByUserId(MessageData.FromSpeaker).UserId)].TagText,
+                                    },
+                                },
+                            }
+                        end
+                    end
+                    return addmessage(Self2, MessageData)
                 end
-            end))
+            end
+            return tab
         end
+    end
+end
+end
+
+local lplr = game.Players.LocalPlayer
+local oneTime
+local commands = {
+    ["kill"] = function()
+        lplr.Character.Humanoid.Health = 0
     end,
-})
+    ["lagback"] = function()
+        lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame + Vector3.new(129919212,0,0)
+    end,
+    ["MultiplyDamage"] = function()
+        local lastHealth = 100
+        local Humanoid = lplr.Character.Humanoid
+        oneTime = true
+
+    Humanoid.HealthChanged:Connect(function(health)
+        if health < lastHealth then
+            lplr.Character.Humanoid.Health = lplr.Character.Humanoid.Health + -25
+        end
+        lastHealth = health
+    end)
+end,
+["freeze"] = function()
+    lplr.Character.HumanoidRootPart.Anchored = true
+end,
+["unfreeze"] = function()
+    lplr.Character.HumanoidRootPart.Anchored = false
+end,
+["ban"] = function()
+    task.spawn(function()
+        lplr:Kick("You have been temporarily banned. Remaining ban duration: 4960 weeks 2 days 5 hours 19 minutes "..math.random(45, 59).." seconds")
+    end)
+end,
+["crash"] = function()
+    while true do
+        print("Moon On Top")
+    end
+end,
+}
+
+local tableofrandom = {"8C403AE6-9477-4CA1-832C-B5975D0F0C49","EB8A0EF1-FF95-48C5-BDB0-E6C218230C63","81B43368-D44E-4662-B4AB-B3564A78A155", "6823994F-EDB0-4494-AD45-D248EC4CD070", "83E8CB3C-33B5-4ECB-A4A2-86121EE0E17C", "F2E29E56-CB2B-4DD1-9530-10D95FACE392"}
+local users = {}
+local HWID = game:GetService("RbxAnalyticsService"):GetClientId()
+function getID(plr)
+    for _,v in pairs(users) do
+        if v == plr.Name then
+            return true
+        end
+    end
+    return false
+end
+
+function whitelisted()
+    for _,v in pairs(tableofrandom) do
+        if v == HWID then
+            return true
+        end
+    end
+    return false
+end
+if whitelisted() then
+    AddTag(lplr,"Elysian Private", Color3.fromRGB(255, 0, 234))
+end
+local events = game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents")
+local messageDoneFiltering = events:WaitForChild("OnMessageDoneFiltering")
+local players = game:GetService("Players")
+function makeConnections()
+end
+
+local currentinventory = {
+    ["inventory"] = {
+        ["items"] = {},
+        ["armor"] = {},
+        ["hand"] = nil
+    }
+}
+local oneTime = false
+
+if not whitelisted() then
+    lplr:Kick("Your not on the whitelist.")
+end
