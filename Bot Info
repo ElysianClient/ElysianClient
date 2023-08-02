@@ -1,0 +1,67 @@
+const { Client, MessageEmbed } = require('discord.js');
+const fetch = require('node-fetch');
+const client = new Client();
+const ELYSIAN_PRIVATE_ROLE_ID = '1122022612432859226'; // Replace with the actual role ID
+const WELCOME_CHANNEL_ID = '1136158530089533451'; // Replace with the actual channel ID
+
+const cooldowns = new Map();
+
+client.once('ready', () => {
+  console.log('Bot is online!');
+});
+
+// Function to fetch the latest GitHub updates
+async function getGitHubUpdates() {
+  const url = 'https://api.github.com/repos/ElysianClient/ElysianClient/commits';
+  const response = await fetch(url);
+  const data = await response.json();
+  return data.slice(0, 5); // Get the latest 5 commits, you can change this number as needed.
+}
+
+client.on('message', async (message) => {
+  if (message.content.startsWith('!all')) {
+    // Check if the user has the ELYSIAN Private role and is in the welcome channel
+    if (
+      message.member &&
+      message.member.roles.cache.has(ELYSIAN_PRIVATE_ROLE_ID) &&
+      message.channel.id === WELCOME_CHANNEL_ID
+    ) {
+      // Check if the user is on cooldown
+      if (cooldowns.has(message.author.id)) {
+        const cooldownExpiration = cooldowns.get(message.author.id);
+        const remainingCooldown = (cooldownExpiration - Date.now()) / 1000;
+
+        return message.channel.send(`Please wait ${remainingCooldown.toFixed(1)} seconds before using the command again.`);
+      }
+
+      // Apply the cooldown
+      const cooldownTime = 15 * 1000; // 15 seconds
+      cooldowns.set(message.author.id, Date.now() + cooldownTime);
+      
+      // Fetch GitHub updates
+      const githubUpdates = await getGitHubUpdates();
+
+      // Get information about the executor
+      const executorInfo = `Executor: ${message.author.username}#${message.author.discriminator}`;
+
+      // Create and send a welcome to ELYSIAN embedded message
+      const embed = new MessageEmbed()
+        .setColor('#0099ff') // ELYSIAN blue color
+        .setTitle('🌟 Welcome to ELYSIAN 🌟')
+        .setDescription('Welcome to the ELYSIAN community! Here are the updates from GitHub, bio, help, and new Discord private channels.')
+        .addField('🔧 GitHub Updates 🔧', githubUpdates.map(commit => `${commit.commit.message} - ${commit.author.login}`).join('\n'))
+        .addField('📜 Bio Updates 📜', 'Elysian Client: The best working client ever known\nWe are cool, unique, and active.')
+        .addField('❓ Help Updates ❓', executorInfo)
+        .addField('🔒 New Discord Private Channels 🔒', 'Your new private channels updates here')
+        .addField('💻 Electron Krnl 💻', 'Electron Krnl is a good choice too!')
+        .setTimestamp();
+
+      message.channel.send(embed);
+    } else {
+      message.channel.send('You do not have permission to use this command in this channel.');
+    }
+  }
+});
+
+// Log in with your bot token
+client.login('YOUR_BOT_TOKEN');
